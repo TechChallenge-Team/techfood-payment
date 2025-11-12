@@ -1,0 +1,10 @@
+@rootUrl=http://localhost:49752/v1
+
+### Get all preparations
+GET {{rootUrl}}/preparations
+
+### Start Preparation
+PATCH {{rootUrl}}/preparations/24a2e4ba-1ab8-4c78-aef5-ed6a79bec23b/start
+
+### Finish Preparation
+PATCH {{rootUrl}}/preparations/42dab128-09eb-4623-a574-f1ea86151c88/finish
