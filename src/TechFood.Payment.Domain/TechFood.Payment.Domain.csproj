@@ -11,6 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="TechFood.Payment.Application.Tests" />
+    <InternalsVisibleTo Include="TechFood.Payment.Domain.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Resources\Exceptions.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

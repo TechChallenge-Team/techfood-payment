@@ -27,4 +27,8 @@
     <ProjectReference Include="..\TechFood.Payment.Domain\TechFood.Payment.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="TechFood.Payment.Application.Tests" />
+    <InternalsVisibleTo Include="TechFood.Payment.Integration.Tests" />
+  </ItemGroup>
 </Project>

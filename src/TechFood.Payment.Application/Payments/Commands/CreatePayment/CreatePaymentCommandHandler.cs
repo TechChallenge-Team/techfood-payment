@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using TechFood.Application.Common.Resources;
+using TechFood.Payment.Application.Common.Resources;
 using TechFood.Payment.Application.Common.Services.Interfaces;
 using TechFood.Payment.Application.Payments.Dto;
 using TechFood.Payment.Domain.Repositories;

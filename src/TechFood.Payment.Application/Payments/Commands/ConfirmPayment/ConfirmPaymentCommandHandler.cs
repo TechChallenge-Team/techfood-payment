@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using TechFood.Application.Common.Resources;
+using TechFood.Payment.Application.Common.Resources;
 using TechFood.Payment.Application.Payments.Events;
 using TechFood.Payment.Domain.Repositories;
 using TechFood.Shared.Application.Exceptions;

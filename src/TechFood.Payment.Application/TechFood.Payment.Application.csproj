@@ -37,6 +37,10 @@
       <DependentUpon>Validators.resx</DependentUpon>
     </Compile>
   </ItemGroup>
+  
+  <ItemGroup>
+    <InternalsVisibleTo Include="TechFood.Payment.Application.Tests" />
+  </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="Common\Resources\Exceptions.resx">
