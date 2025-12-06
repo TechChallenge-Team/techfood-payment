@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using TechFood.Payment.Application.Common.Data.QrCode;
+using TechFood.Payment.Application.Common.Dto.QrCode;
 using TechFood.Payment.Application.Common.Services.Interfaces;
 
 namespace TechFood.Payment.Infra.Payments.MercadoPago;

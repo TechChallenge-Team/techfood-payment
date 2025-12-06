@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8</TargetFramework>
@@ -17,12 +17,14 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
-    <PackageReference Include="TechFood.Shared.Infra" Version="0.1.12-rc" />
+    <PackageReference Include="TechFood.Shared.Application" Version="0.2.4-rc" />
+    <PackageReference Include="TechFood.Shared.Infra" Version="0.2.4-rc" />
     <!--<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.3" />-->
   </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\TechFood.Payment.Application\TechFood.Payment.Application.csproj" />
+    <ProjectReference Include="..\TechFood.Payment.Domain\TechFood.Payment.Domain.csproj" />
   </ItemGroup>
 
 </Project>

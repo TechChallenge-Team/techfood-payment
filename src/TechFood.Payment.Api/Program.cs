@@ -1,9 +1,7 @@
-using Microsoft.Extensions.FileProviders;
-using TechFood.Shared.Presentation.Extensions;
 using TechFood.Payment.Application;
 using TechFood.Payment.Infra;
-using TechFood.Shared.Infra.Persistence.Contexts;
-using Microsoft.EntityFrameworkCore;
+using TechFood.Payment.Infra.Persistence.Contexts;
+using TechFood.Shared.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -11,24 +9,24 @@ var builder = WebApplication.CreateBuilder(args);
     {
         AddSwagger = true,
         AddJwtAuthentication = true,
-        SwaggerTitle = "TechFood API V1",
-        SwaggerDescription = "TechFood API V1"
+        SwaggerTitle = "TechFood Payment API V1",
+        SwaggerDescription = "TechFood Payment API V1"
     });
 
     builder.Services.AddApplication();
+
     builder.Services.AddInfra();
+
+    builder.Services.AddAuthorizationBuilder()
+       .AddPolicy("orders.read", policy => policy.RequireClaim("scope", "orders.read"))
+       .AddPolicy("orders.write", policy => policy.RequireClaim("scope", "orders.write"));
 }
 
 var app = builder.Build();
 {
-    //Run migrations
-    using (var scope = app.Services.CreateScope())
-    {
-        var dataContext = scope.ServiceProvider.GetRequiredService<TechFoodContext>();
-        dataContext.Database.Migrate();
-    }
+    app.RunMigration<PaymentContext>();
 
-    app.UsePathBase("/api");
+    app.UsePathBase("/payment");
 
     app.UseForwardedHeaders();
 
@@ -46,23 +44,19 @@ var app = builder.Build();
         {
             options.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi2_0;
         });
-
-        app.UseSwaggerUI();
     }
+
+    app.UseSwaggerUI();
 
     app.UseInfra();
 
     app.UseHealthChecks("/health");
 
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        RequestPath = app.Configuration["TechFoodStaticImagesUrl"],
-        FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "images")),
-    });
-
     app.UseRouting();
 
     app.UseCors();
+
+    app.UseAuthentication();
 
     app.UseAuthorization();
 

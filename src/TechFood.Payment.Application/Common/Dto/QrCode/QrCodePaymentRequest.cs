@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace TechFood.Payment.Application.Common.Data.QrCode;
+namespace TechFood.Payment.Application.Common.Dto.QrCode;
 
 public class QrCodePaymentRequest
 {

@@ -1,40 +1,29 @@
 using System;
 using System.Net.Http;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using TechFood.Payment.Application.Common.Dto.Order;
 using TechFood.Payment.Application.Common.Services.Interfaces;
 
-namespace TechFood.Payment.Infra.Order
+namespace TechFood.Payment.Infra.Order;
+
+internal class OrderService : IOrderService
 {
-    internal class OrderService(
-        IHttpClientFactory httpClientFactory,
-        IHttpContextAccessor httpContextAccessor
-        ) : IOrderService
+    private readonly HttpClient _httpClient;
+
+    public OrderService(HttpClient httpClient)
     {
-        private readonly HttpClient _client = httpClientFactory.CreateClient(OrderOptions.ClientName);
-        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+        _httpClient = httpClient;
+    }
 
-        private static readonly JsonSerializerOptions _jsonOptions = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-            Converters =
-            {
-                new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower)
-            },
-        };
+    public async Task<OrderDto> GetByIdAsync(Guid orderId)
+    {
+        var response = await _httpClient.GetAsync($"/v1/Orders/{orderId}");
 
-        public async Task<Application.Common.Data.Order.OrderResult> GetByIdAsync(Guid orderId)
-        {
-            var response = await _client.GetAsync($"/v1/Orders/{orderId}");
+        response.EnsureSuccessStatusCode();
 
-            response.EnsureSuccessStatusCode();
+        var deserializeObject = await response.Content.ReadFromJsonAsync<OrderDto>();
 
-            var deserializeObject = await response.Content.ReadAsStringAsync();
-
-            return new();
-        }
-
+        return deserializeObject;
     }
 }
