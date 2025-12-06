@@ -146,7 +146,7 @@ jobs:
       #       -f src/TechFood.Payment.Worker/Dockerfile \
       #       --build-arg GITHUB_TOKEN=${{ env.GITHUB_TOKEN }} \
       #       --build-arg GITHUB_ACTOR=${{ github.actor }} \
-            .
+            # .
 
       # - name: Push Docker image (Worker)
       #   run: |
