@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TechFood.Payment.Infra.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
+    <PackageReference Include="TechFood.Shared.Application" Version="0.2.4-rc" />
+    <PackageReference Include="TechFood.Shared.Infra" Version="0.2.4-rc" />
+    <!--<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.3" />-->
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\TechFood.Payment.Application\TechFood.Payment.Application.csproj" />
+    <ProjectReference Include="..\TechFood.Payment.Domain\TechFood.Payment.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TechFood.Payment.Application.Tests" />
+    <InternalsVisibleTo Include="TechFood.Payment.Integration.Tests" />
+  </ItemGroup>
+</Project>
