@@ -29,19 +29,19 @@ internal class MercadoPagoPaymentService(
         },
     };
 
-    public async Task<QrCodePaymentResult> GenerateQrCodePaymentAsync(QrCodePaymentRequest data)
+    public async Task<QrCodePaymentResult> GenerateQrCodePaymentAsync(QrCodePaymentRequest request)
     {
         var http = _httpContextAccessor.HttpContext!.Request;
 
         var response = await _client.PostAsJsonAsync("v1/orders",
             new OrderRequest(
                 OrderType.QR,
-                data.OrderId.ToString(),
-                data.Title,
-                data.Amount.ToString(CultureInfo.InvariantCulture),
-                new(new OrderQRConfig(data.PosId, OrderQRConfigMode.Dynamic)),
-                new OrderTransaction([new(data.Amount.ToString(CultureInfo.InvariantCulture))]),
-                data.Items.ConvertAll(
+                request.OrderId.ToString(),
+                request.Title,
+                request.Amount.ToString(CultureInfo.InvariantCulture),
+                new(new OrderQRConfig(request.PosId, OrderQRConfigMode.Dynamic)),
+                new OrderTransaction([new(request.Amount.ToString(CultureInfo.InvariantCulture))]),
+                request.Items.ConvertAll(
                     i => new OrderItem(
                         i.Title,
                         i.Quantity,
