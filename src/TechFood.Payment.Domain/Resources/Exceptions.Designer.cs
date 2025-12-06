@@ -39,7 +39,7 @@ namespace TechFood.Domain.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TechFood.Domain.Resources.Exceptions", typeof(Exceptions).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TechFood.Payment.Domain.Resources.Exceptions", typeof(Exceptions).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
