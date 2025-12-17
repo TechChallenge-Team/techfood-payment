@@ -222,7 +222,7 @@ The application comes with pre-configured test credentials for Mercado Pago paym
 
 The default database connection string used by the API:
 
-**Connection String**: `Server=techfood.db;Database=dbtechfood;User Id=sa;Password=123456#4EA;TrustServerCertificate=True;`
+**Connection String**: `Server=techfood.db;Database=techfood_payment;User Id=sa;Password=123456#4EA;TrustServerCertificate=True;`
 
 _Note: These credentials are for development/testing purposes only. For production deployments, ensure to use secure credentials and proper environment variable management._
 
