@@ -41,11 +41,15 @@ public class CommandsAndEventsTests
     [Trait("Application", "Events")]
     public void ConfirmedPaymentEvent_ShouldBeCreated()
     {
+        // Arrange
+        var orderId = Guid.NewGuid();
+
         // Act
-        var @event = new ConfirmedPaymentEvent();
+        var @event = new ConfirmedPaymentEvent(orderId);
 
         // Assert
         @event.Should().NotBeNull();
+        @event.OrderId.Should().Be(orderId);
     }
 
     [Fact(DisplayName = "CreatePaymentCommand with different payment types")]

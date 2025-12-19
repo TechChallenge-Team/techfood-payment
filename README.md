@@ -35,7 +35,7 @@ O Payment Service segue uma arquitetura hexagonal (ports and adapters) com separ
 │                     Payment Service                          │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ Payment.Api  │  │Payment.WebHook│ │Mercado Pago  │      │
+│  │ Payment.Api  │  │Payment.Worker│ │Mercado Pago  │      │
 │  │              │  │               │  │   (External) │      │
 │  │ - REST API   │  │ - Webhook     │  │              │      │
 │  │ - Swagger    │  │ - Consumer    │  │              │      │
@@ -75,7 +75,7 @@ O Payment Service segue uma arquitetura hexagonal (ports and adapters) com separ
 ### Key Components
 
 - **Payment.Api**: REST API para criação e consulta de pagamentos
-- **Payment.WebHook**: Worker que recebe webhooks do Mercado Pago e consome eventos
+- **Payment.Worker**: Worker que recebe webhooks do Mercado Pago e consome eventos
 - **Payment.Application**: Camada de aplicação com handlers de comandos e eventos
 - **Payment.Domain**: Lógica de negócio e entidades de domínio
 - **Payment.Infra**: Implementação de persistência e integrações externas
@@ -112,7 +112,7 @@ techfood-payment/
 │   │   ├── Program.cs
 │   │   └── appsettings.json
 │   │
-│   ├── TechFood.Payment.WebHook/          # Background Worker
+│   ├── TechFood.Payment.Worker/           # Background Worker
 │   │   ├── Program.cs                      # Consumer & Webhook receiver
 │   │   └── appsettings.json
 │   │
@@ -193,7 +193,7 @@ techfood-payment/
 
 3. **Update Configuration**
 
-   Edit `appsettings.json` in both `Payment.Api` and `Payment.WebHook`:
+   Edit `appsettings.json` in both `Payment.Api` and `Payment.Worker`:
 
    ```json
    {
@@ -232,10 +232,10 @@ techfood-payment/
    API will be available at: `http://localhost:45002`
    Swagger: `http://localhost:45002/swagger`
 
-6. **Start Payment WebHook Worker**
+6. **Start Payment Worker**
 
    ```bash
-   cd src/TechFood.Payment.WebHook
+   cd src/TechFood.Payment.Worker
    dotnet run
    ```
 
@@ -251,7 +251,7 @@ O Payment Service participa da arquitetura orientada a eventos do TechFood:
 - **Source**: Order Service
 - **Handler**: `OrderCreatedEventHandler`
 - **Action**: Cria pagamento automaticamente para o pedido
-- **Queue**: `TechFood.Payment.WebHook_OrderCreatedIntegrationEvent_queue`
+- **Queue**: `TechFood.Payment.Worker_OrderCreatedIntegrationEvent_queue`
 
 **Event Structure**:
 ```csharp
@@ -266,8 +266,8 @@ public record OrderCreatedIntegrationEvent(
 Order.Api creates order
     ↓ Publishes OrderCreatedIntegrationEvent
 RabbitMQ (techfood.events.exchange)
-    ↓ Routes to Payment.WebHook queue
-Payment.WebHook consumes event
+    ↓ Routes to Payment.Worker queue
+Payment.Worker consumes event
     ↓ Invokes OrderCreatedEventHandler
     ↓ Sends CreatePaymentCommand
 CreatePaymentCommandHandler
@@ -313,7 +313,7 @@ Order.Worker consumes event
 - **Auto Delete**: No
 
 **Queues**:
-- `TechFood.Payment.WebHook_OrderCreatedIntegrationEvent_queue`
+- `TechFood.Payment.Worker_OrderCreatedIntegrationEvent_queue`
   - Bound to routing key: `OrderCreatedIntegrationEvent`
   - Durable: Yes
   - Exclusive: No
@@ -528,8 +528,8 @@ services:
       - rabbitmq
       - sqlserver
   
-  payment-webhook:
-    build: ./src/TechFood.Payment.WebHook
+  payment-worker:
+    build: ./src/TechFood.Payment.Worker
     environment:
       - ConnectionStrings__DataBaseConection=...
       - EventBus__RabbitMQ__HostName=rabbitmq
@@ -541,7 +541,7 @@ services:
 ### Health Checks
 
 - **Payment.Api**: `GET /health`
-- **Payment.WebHook**: Background service logs
+- **Payment.Worker**: Background service logs
 
 ## 📖 Related Documentation
 
