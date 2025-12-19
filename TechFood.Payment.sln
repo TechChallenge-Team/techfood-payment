@@ -30,7 +30,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechFood.Payment.Applicatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechFood.Payment.Infra.Tests", "tests\TechFood.Payment.Infra.Tests\TechFood.Payment.Infra.Tests.csproj", "{E9507116-BB8A-467B-A1C1-9B85F3413E7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechFood.Payment.WebHook", "src\TechFood.Payment.WebHook\TechFood.Payment.WebHook.csproj", "{204E0F7D-58BF-473F-8965-C239F07BADC2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechFood.Payment.Worker", "src\TechFood.Payment.Worker\TechFood.Payment.Worker.csproj", "{204E0F7D-58BF-473F-8965-C239F07BADC2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

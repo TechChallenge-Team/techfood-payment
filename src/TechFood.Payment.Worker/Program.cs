@@ -1,8 +1,6 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using TechFood.Payment.Application;
 using TechFood.Payment.Infra;
+using TechFood.Payment.Application;
+using Microsoft.AspNetCore.Builder;
 
 var builder = Host.CreateApplicationBuilder(args);
 {

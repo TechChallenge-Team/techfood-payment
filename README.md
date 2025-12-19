@@ -1,211 +1,370 @@
-# TechFood
+# 💳 TechFood Payment Service
 
-TechFood is a FIAP Post-Graduation project that aims to create a web application for a food delivery service. The project is developed using the dotnet core framework and utilizes the ASP.NET Core MVC architecture. The application is designed to be responsive and user-friendly, providing a seamless experience for both customers and restaurant owner. The project is built with a focus on clean architecture, DDD, and hexagonal architecture principles.
+[![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/TechChallenge-Team/techfood-payment)
+[![.NET](https://img.shields.io/badge/.NET-8.0-purple)](https://dotnet.microsoft.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Microserviço de gerenciamento de pagamentos do ecossistema TechFood. Responsável por processar pagamentos via Mercado Pago, gerenciar webhooks e comunicar status de pagamento para outros serviços via RabbitMQ.
+
+## 🎯 Responsabilidades do Serviço
+
+- **Processamento de Pagamentos**: Integração com Mercado Pago para geração de QR Code e processamento de pagamentos
+- **Gerenciamento de Webhooks**: Recebe notificações do Mercado Pago sobre status de pagamento
+- **Event-Driven Architecture**: Consome eventos de criação de pedidos e publica eventos de confirmação de pagamento
+- **Persistência**: Armazena histórico de transações e status de pagamentos
 
 ## 📋 Table of Contents
 
-- [Project Presentation](#project-presentation)
-- [Brainstorming](#brainstorming)
-- [Architecture](#architecture)
-- [Technologies Used](#technologies-used)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-  - [☸️ Kubernetes Deployment](./k8s/README.md)
-  - [🐳 Docker Deployment](./DOCKER.md)
-  - [⚡ AWS Lambda Deployment](./LAMBDA-README.md)
-- [Configuration](#configuration)
-- [API Documentation](#order-flow---swagger)
-- [Frontend Flows](#order-flow---frontend)
-- [Team Members](#members)
+- [Responsabilidades do Serviço](#-responsabilidades-do-serviço)
+- [Architecture](#-architecture)
+- [Technologies Used](#-technologies-used)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [Event-Driven Communication](#-event-driven-communication)
+- [API Documentation](#-api-documentation)
+- [Configuration](#-configuration)
+- [Database Schema](#-database-schema)
+- [Team Members](#-team-members)
 
-## Project Presentation
+## 🏗️ Architecture
 
-[![Watch the video](https://img.youtube.com/vi/0T7fcPIKPRI/0.jpg)](https://youtu.be/0T7fcPIKPRI)
+O Payment Service segue uma arquitetura hexagonal (ports and adapters) com separação clara de responsabilidades:
 
-## Brainstorming
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Payment Service                          │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │ Payment.Api  │  │Payment.Worker│ │Mercado Pago  │      │
+│  │              │  │               │  │   (External) │      │
+│  │ - REST API   │  │ - Webhook     │  │              │      │
+│  │ - Swagger    │  │ - Consumer    │  │              │      │
+│  └──────┬───────┘  └──────┬────────┘  └──────────────┘      │
+│         │                  │                                  │
+│  ┌──────▼──────────────────▼──────────┐                      │
+│  │    Payment.Application               │                     │
+│  │  - Commands/Queries (CQRS)          │                     │
+│  │  - Event Handlers                   │                     │
+│  │  - DTOs                             │                     │
+│  └──────────────┬──────────────────────┘                     │
+│                 │                                             │
+│  ┌──────────────▼──────────────────────┐                     │
+│  │      Payment.Domain                 │                     │
+│  │  - Entities (Payment)               │                     │
+│  │  - Business Rules                   │                     │
+│  │  - Domain Events                    │                     │
+│  └──────────────┬──────────────────────┘                     │
+│                 │                                             │
+│  ┌──────────────▼──────────────────────┐                     │
+│  │      Payment.Infra                  │                     │
+│  │  - SQL Server (EF Core)             │                     │
+│  │  - RabbitMQ EventBus                │                     │
+│  │  - External Services                │                     │
+│  └─────────────────────────────────────┘                     │
+└─────────────────────────────────────────────────────────────┘
 
-[![Brainstorming](docs/miro.png)](https://miro.com/app/board/uXjVIuYTFVc=/)
+              ▲                            │
+              │ OrderCreated               │ PaymentConfirmed
+              │ Event                      ▼ Event
+         ┌────┴─────┐              ┌────────────┐
+         │  Order   │              │   Order    │
+         │ Service  │              │  Service   │
+         └──────────┘              └────────────┘
+```
 
-## Architecture (k8s)
+### Key Components
 
-### Solution Architecture
+- **Payment.Api**: REST API para criação e consulta de pagamentos
+- **Payment.Worker**: Worker que recebe webhooks do Mercado Pago e consome eventos
+- **Payment.Application**: Camada de aplicação com handlers de comandos e eventos
+- **Payment.Domain**: Lógica de negócio e entidades de domínio
+- **Payment.Infra**: Implementação de persistência e integrações externas
 
-The TechFood application follows a microservices architecture designed to handle the specific business requirements of a food delivery service. The architecture addresses both business needs and infrastructure requirements for scalable deployment.
-
-![Architecture Diagram](docs/k8s.png)
-
-#### Business Requirements Addressed
-
-The architecture solves the following business problems:
-
-1. **Customer Self-Service Ordering**: Enables customers to browse menus and place orders independently without staff assistance
-2. **Real-time Order Management**: Provides restaurant staff with immediate visibility into incoming orders and preparation status
-3. **Payment Processing Integration**: Seamlessly integrates with Mercado Pago for secure payment processing
-4. **Order Tracking**: Allows customers to monitor their order status in real-time
-5. **Multi-tenant Restaurant Support**: Supports multiple restaurants with isolated data and operations
-
-#### Infrastructure Requirements
-
-The solution is designed to run on various Kubernetes platforms:
-
-- **Local Development**: Minikube or Kind for local testing and development
-- **Cloud Platforms**:
-  - Azure Kubernetes Service (AKS)
-  - Amazon Elastic Kubernetes Service (EKS)
-  - Google Kubernetes Engine (GKE)
-- **Hybrid Cloud**: Can be deployed on any Kubernetes-compliant platform
-
-**Key Infrastructure Components**:
-
-- **Container Orchestration**: Kubernetes for automated deployment, scaling, and management
-- **Load Balancing**: NGINX ingress controller for traffic distribution
-- **Data Persistence**: SQL Server with persistent volume claims
-- **Service Mesh**: Internal service communication via Kubernetes services
-- **Monitoring**: Built-in health checks and readiness probes
-- **Scalability**: Horizontal pod autoscaling capabilities
-
-## Technologies Used
+## 🛠️ Technologies Used
 
 ### Backend
 
-- **ASP.NET Core** - Web API framework
+- **ASP.NET Core 8.0** - Web API framework
 - **Entity Framework Core** - ORM for database access
-- **AutoMapper** - Object mapping
-- **SQL Server** - Database
+- **MediatR 9.0** - CQRS and event handling
+- **SQL Server** - Relational database
+- **RabbitMQ** - Message broker for event-driven communication
 
-### Frontend
+### External Integrations
 
-- **RadixUI** - UI component library
-- **TypeScript** - Type-safe JavaScript
-- **React** - Frontend framework
-- **HTML/CSS** - Markup and styling
+- **Mercado Pago API** - Payment gateway integration
+- **TechFood.Shared** - Shared libraries (Domain, Application, Infra, Worker)
 
 ### Infrastructure & DevOps
 
 - **Docker & Docker Compose** - Containerization
-- **Kubernetes** - Container orchestration
-- **AWS Lambda** - Serverless functions for Authentication and Customer endpoints
-- **NGINX** - Reverse proxy and load balancer
-- **Minikube** - Local Kubernetes development
+- **RabbitMQ** - Event bus for inter-service communication
+- **Health Checks** - Application monitoring and readiness probes
 
-### Serverless
+## 📁 Project Structure
 
-- **AWS Lambda** - Serverless compute for specific endpoints
-- **API Gateway** - RESTful API endpoint management
-- **AWS SAM** - Serverless Application Model for deployment
+```
+techfood-payment/
+├── src/
+│   ├── TechFood.Payment.Api/              # REST API
+│   │   ├── Controllers/
+│   │   │   └── PaymentsController.cs      # Payment endpoints
+│   │   ├── Program.cs
+│   │   └── appsettings.json
+│   │
+│   ├── TechFood.Payment.Worker/           # Background Worker
+│   │   ├── Program.cs                      # Consumer & Webhook receiver
+│   │   └── appsettings.json
+│   │
+│   ├── TechFood.Payment.Application/      # Application Layer
+│   │   ├── Payments/
+│   │   │   ├── Commands/
+│   │   │   │   ├── CreatePayment/         # Create payment command
+│   │   │   │   └── ConfirmPayment/        # Confirm payment command
+│   │   │   ├── Events/
+│   │   │   │   ├── OrderCreatedEventHandler.cs    # Consumes OrderCreated
+│   │   │   │   └── ConfirmedPaymentEvent.cs       # Publishes PaymentConfirmed
+│   │   │   └── Dto/
+│   │   ├── Common/
+│   │   │   └── Services/
+│   │   │       └── Interfaces/
+│   │   │           ├── IOrderService.cs   # Order HTTP client
+│   │   │           ├── IBackofficeService.cs
+│   │   │           └── IPaymentService.cs # Mercado Pago abstraction
+│   │   └── DependencyInjection.cs
+│   │
+│   ├── TechFood.Payment.Domain/           # Domain Layer
+│   │   ├── Entities/
+│   │   │   └── Payment.cs                 # Payment aggregate
+│   │   └── Repositories/
+│   │       └── IPaymentRepository.cs
+│   │
+│   ├── TechFood.Payment.Infra/           # Infrastructure Layer
+│   │   ├── Persistence/
+│   │   │   ├── Contexts/
+│   │   │   │   └── PaymentContext.cs     # EF DbContext
+│   │   │   └── Repositories/
+│   │   │       └── PaymentRepository.cs
+│   │   ├── Payments/
+│   │   │   └── MercadoPago/              # Mercado Pago integration
+│   │   │       └── MercadoPagoPaymentService.cs
+│   │   ├── Order/
+│   │   │   └── OrderService.cs           # HTTP client to Order service
+│   │   ├── Backoffice/
+│   │   │   └── BackofficeService.cs      # HTTP client to Backoffice
+│   │   └── DependencyInjection.cs
+│   │
+│   └── TechFood.Payment.Contracts/       # DTOs and Contracts
+│
+├── tests/
+│   ├── TechFood.Payment.Api.Tests/
+│   ├── TechFood.Payment.Application.Tests/
+│   └── TechFood.Payment.Infra.Tests/
+│
+└── docs/                                  # Documentation
+    └── Mercado Pago Developers.postman_collection.json
+```
 
-### Payment Integration
+## 🚀 Getting Started
 
-- **Mercado Pago API** - Payment processing
+### Prerequisites
 
-## Features
+- **.NET 8.0 SDK** - [Download](https://dotnet.microsoft.com/download/dotnet/8.0)
+- **SQL Server** - LocalDB or Docker container
+- **RabbitMQ** - Message broker for events
 
-### Customer Features
-
-- Consumer self-ordering system
-- Consumer registration and login
-- Menu browsing and item selection
-- Order placement and tracking
-- Payment integration (Mercado Pago)
-- Real-time order status monitoring
-
-### Restaurant Features
-
-- Restaurant registration and login
-- Menu management
-- Order preparation tracking
-- Admin panel for restaurant operations
-- Order fulfillment workflow
-
-### Project Structure
-
-The project is organized into several key components:
-
-#### Core Applications
-
-- **SQL Server**: Database that stores all application data (users, restaurants, menus, orders)
-- **API**: Backend API built with ASP.NET Core that handles all business logic
-- **Self-Order**: Consumer-facing frontend for placing orders (RadixUI + React)
-- **Monitor**: Real-time order tracking application for customers
-- **Admin**: Restaurant management interface for menu and order management
-- **NGINX**: Reverse proxy server for routing requests
-
-#### Deployment & Infrastructure
-
-- **Docker**: Containerization with Docker Compose for local development
-- **Kubernetes**: Ready orchestration with Minikube support
-- **k8s/**: Kubernetes manifests and deployment scripts
-- **nginx/**: NGINX configuration files
-
-## Getting Started
-
-### Quick Start Summary
+### Quick Start
 
 1. **Clone the repository**
 
    ```bash
    git clone <repository-url>
-   cd tech-challenge/fase1
+   cd techfood-payment
    ```
 
-You can run this project using different deployment methods:
+2. **Start RabbitMQ (Docker)**
 
-### ☸️ Kubernetes Deployment
+   ```bash
+   docker run -d --name rabbitmq \
+     -p 5672:5672 \
+     -p 15672:15672 \
+     rabbitmq:3-management
+   ```
 
-For deployment using Kubernetes (Minikube), see the detailed instructions in:
-📖 **[k8s/README.md](./k8s/README.md)**
+3. **Update Configuration**
 
-Follow the guide in [k8s/README.md](./k8s/README.md)
+   Edit `appsettings.json` in both `Payment.Api` and `Payment.Worker`:
 
-- API Swagger: http://localhost:30000/api/swagger/index.html
-- Self-Order App: http://localhost:30000/self-order/
-- Monitor App: http://localhost:30000/monitor/
-- Admin App: http://localhost:30000/admin/
+   ```json
+   {
+     "ConnectionStrings": {
+       "DataBaseConection": "Server=(localdb)\\mssqllocaldb;Initial Catalog=dbtechfood.payment;..."
+     },
+     "EventBus": {
+       "RabbitMQ": {
+         "HostName": "localhost",
+         "Port": 5672,
+         "UserName": "guest",
+         "Password": "guest"
+       }
+     },
+     "Services": {
+       "Order": "http://localhost:45001/",
+       "Backoffice": "http://localhost:45004/"
+     }
+   }
+   ```
 
-### 🐳 Docker Deployment
+4. **Run Database Migrations**
 
-For quick setup using Docker containers, see the detailed instructions in:
-📖 **[DOCKER.md](./DOCKER.md)**
+   ```bash
+   cd src/TechFood.Payment.Api
+   dotnet ef database update
+   ```
 
-`docker-compose up -d` (see [DOCKER.md](./DOCKER.md) for details)
+5. **Start Payment API**
 
-- API Swagger: http://localhost:5000/api/swagger/index.html
-- Self-Order App: http://localhost:5000/self-order/
-- Monitor App: http://localhost:5000/monitor/
-- Admin App: http://localhost:5000/admin/
+   ```bash
+   cd src/TechFood.Payment.Api
+   dotnet run
+   ```
 
-### ⚡ AWS Lambda Deployment
+   API will be available at: `http://localhost:45002`
+   Swagger: `http://localhost:45002/swagger`
 
-For serverless deployment of Customer and Authentication endpoints using AWS Lambda, see:
-📖 **[LAMBDA-README.md](./LAMBDA-README.md)**
+6. **Start Payment Worker**
 
-This deployment method provides:
+   ```bash
+   cd src/TechFood.Payment.Worker
+   dotnet run
+   ```
 
-- **Serverless Customer Endpoints**: Create and retrieve customer data
-- **Serverless Authentication**: Sign-in functionality
-- **Auto-scaling**: Handles traffic spikes automatically
-- **Cost-effective**: Pay only for actual usage
+   The worker will automatically subscribe to `OrderCreatedIntegrationEvent`
 
-Quick deployment:
+## 🔄 Event-Driven Communication
 
-```bash
-# Build and deploy
-./build-lambdas.bat  # Windows
-./deploy-lambdas.bat # Windows
+O Payment Service participa da arquitetura orientada a eventos do TechFood:
 
-# Or on Linux/Mac
-./build-lambdas.sh
-./deploy-lambdas.sh
+### Events Consumed
+
+#### `OrderCreatedIntegrationEvent`
+- **Source**: Order Service
+- **Handler**: `OrderCreatedEventHandler`
+- **Action**: Cria pagamento automaticamente para o pedido
+- **Queue**: `TechFood.Payment.Worker_OrderCreatedIntegrationEvent_queue`
+
+**Event Structure**:
+```csharp
+public record OrderCreatedIntegrationEvent(
+    Guid OrderId,
+    List<OrderItemCreatedDto> Items
+) : IIntegrationEvent;
 ```
 
-After deployment, access endpoints via API Gateway URL:
+**Flow**:
+```
+Order.Api creates order
+    ↓ Publishes OrderCreatedIntegrationEvent
+RabbitMQ (techfood.events.exchange)
+    ↓ Routes to Payment.Worker queue
+Payment.Worker consumes event
+    ↓ Invokes OrderCreatedEventHandler
+    ↓ Sends CreatePaymentCommand
+CreatePaymentCommandHandler
+    ↓ Calls Order Service for order details
+    ↓ Generates Mercado Pago QR Code
+    ↓ Saves payment in database
+    ✅ Payment created with status PENDING
+```
 
-- POST `/v1/authentication/signin`
-- POST `/v1/customers`
-- GET `/v1/customers/{document}`
+### Events Published
 
-## Configuration
+#### `ConfirmedPaymentEvent`
+- **Target**: Order Service
+- **Action**: Notifica que pagamento foi confirmado
+- **Routing Key**: `ConfirmedPaymentEvent`
+
+**Event Structure**:
+```csharp
+public class ConfirmedPaymentEvent : IIntegrationEvent
+{
+    public Guid PaymentId { get; set; }
+    public Guid OrderId { get; set; }
+}
+```
+
+**Flow**:
+```
+Mercado Pago webhook notification
+    ↓ POST /v1/payments/{id}
+Payment.Api confirms payment
+    ↓ Publishes ConfirmedPaymentEvent
+RabbitMQ (techfood.events.exchange)
+    ↓ Routes to Order.Worker queue
+Order.Worker consumes event
+    ✅ Updates order status to RECEIVED
+```
+
+### RabbitMQ Configuration
+
+- **Exchange**: `techfood.events.exchange` (Topic)
+- **Exchange Type**: Topic
+- **Durable**: Yes
+- **Auto Delete**: No
+
+**Queues**:
+- `TechFood.Payment.Worker_OrderCreatedIntegrationEvent_queue`
+  - Bound to routing key: `OrderCreatedIntegrationEvent`
+  - Durable: Yes
+  - Exclusive: No
+
+## 📚 API Documentation
+
+### Swagger UI
+
+Access the interactive API documentation at: `http://localhost:45002/swagger`
+
+### Available Endpoints
+
+#### Create Payment
+```http
+POST /v1/payments
+Content-Type: application/json
+
+{
+  "orderId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "type": 1  // 1 = MercadoPago, 2 = CreditCard
+}
+```
+
+**Response**:
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "orderId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "createdAt": "2025-12-18T10:30:00",
+  "paidAt": null,
+  "type": 1,
+  "status": 0,  // 0 = Pending, 1 = Confirmed, 2 = Failed
+  "amount": 59.90
+}
+```
+
+#### Confirm Payment (Webhook)
+```http
+PATCH /v1/payments/{id}
+```
+
+**Response**: `200 OK`
+
+### Payment Flow Example
+
+1. **Order Service creates order** → Publishes `OrderCreatedIntegrationEvent`
+2. **Payment Worker receives event** → Automatically creates payment
+3. **Customer scans QR Code** → Pays via Mercado Pago
+4. **Mercado Pago sends webhook** → POST to `/v1/payments/{id}`
+5. **Payment API confirms payment** → Publishes `ConfirmedPaymentEvent`
+6. **Order Service receives confirmation** → Updates order status
 
 ### Test Credentials
 
@@ -328,11 +487,76 @@ O banco será hospedado no **AWS RDS SQLServer** pelos seguintes motivos:
 
 “Optamos pelo **AWS RDS SQLServer** por se tratar de um banco de dados relacional totalmente gerenciado, com suporte a escalabilidade horizontal e vertical, alta disponibilidade via Multi-AZ e segurança integrada com IAM e KMS. Além disso, o **SQLServer** oferece recursos avançados de modelagem (constraints, índices, JSONB para dados semiestruturados) que suportam o crescimento do sistema da Techfood.”
 
-## Members
+## 🧪 Testing
+
+### Unit Tests
+
+```bash
+# Run all tests
+dotnet test TechFood.Payment.sln
+
+# Run with coverage
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+```
+
+### Integration Tests
+
+```bash
+# Run integration tests
+dotnet test tests/TechFood.Payment.Integration.Tests
+```
+
+### Manual Testing with Postman
+
+Import the Mercado Pago collection from `docs/Mercado Pago Developers.postman_collection.json`
+
+## 🚀 Deployment
+
+### Docker Compose (Development)
+
+```yaml
+version: '3.8'
+services:
+  payment-api:
+    build: ./src/TechFood.Payment.Api
+    ports:
+      - "45002:80"
+    environment:
+      - ConnectionStrings__DataBaseConection=...
+      - EventBus__RabbitMQ__HostName=rabbitmq
+    depends_on:
+      - rabbitmq
+      - sqlserver
+  
+  payment-worker:
+    build: ./src/TechFood.Payment.Worker
+    environment:
+      - ConnectionStrings__DataBaseConection=...
+      - EventBus__RabbitMQ__HostName=rabbitmq
+    depends_on:
+      - rabbitmq
+      - sqlserver
+```
+
+### Health Checks
+
+- **Payment.Api**: `GET /health`
+- **Payment.Worker**: Background service logs
+
+## 📖 Related Documentation
+
+- [TechFood Order Service](https://github.com/TechChallenge-Team/techfood-order)
+- [TechFood Shared Libraries](https://github.com/TechChallenge-Team/techfood-shared)
+- [Mercado Pago API Documentation](https://www.mercadopago.com.br/developers)
+
+## 👥 Team Members
 
 - [Elias Soares - RM 362904](https://github.com/eliassoaressouza)
 - [Paulo Viana - RM 364330](https://github.com/Phviana)
 - [Valdeir Silva - RM 363809](https://github.com/Valdeirsilva2)
 - [Leonardo Borges - RM 363195](https://github.com/ldssBorges)
 - [Leandro Cervantes - RM 361335](https://github.com/leandrocervant)
-"# techfood-payment" 
+
+---
+
+**TechFood Payment Service** - Part of the TechFood Microservices Ecosystem 🍔💳 
