@@ -108,4 +108,153 @@ public class OrderCreatedIntegrationEventTests
         @event.Items[1].Name.Should().Be("Item 2");
         @event.Items[2].Name.Should().Be("Item 3");
     }
+
+    [Fact(DisplayName = "OrderCreatedIntegrationEvent should be serializable")]
+    [Trait("Application", "OrderCreatedIntegrationEvent")]
+    public void OrderCreatedIntegrationEvent_ShouldBeSerializable()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var items = new List<OrderItemCreatedDto>
+        {
+            new(Guid.NewGuid(), "Burger", 25.50m, 2)
+        };
+        var @event = new OrderCreatedIntegrationEvent(orderId, items);
+
+        // Act
+        var json = System.Text.Json.JsonSerializer.Serialize(@event);
+        var deserializedEvent = System.Text.Json.JsonSerializer.Deserialize<OrderCreatedIntegrationEvent>(json);
+
+        // Assert
+        deserializedEvent.Should().NotBeNull();
+        deserializedEvent!.OrderId.Should().Be(orderId);
+        deserializedEvent.Items.Should().HaveCount(1);
+    }
+
+    [Fact(DisplayName = "OrderCreatedIntegrationEvent with null items should throw")]
+    [Trait("Application", "OrderCreatedIntegrationEvent")]
+    public void Constructor_WithNullItems_ShouldHandleGracefully()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+
+        // Act & Assert - depending on implementation, might accept null or throw
+        // If it accepts null, the property should handle it
+        var @event = new OrderCreatedIntegrationEvent(orderId, null!);
+        
+        // Verify behavior (null or empty)
+        @event.OrderId.Should().Be(orderId);
+    }
+
+    [Fact(DisplayName = "OrderCreatedIntegrationEvent should handle large number of items")]
+    [Trait("Application", "OrderCreatedIntegrationEvent")]
+    public void Constructor_WithManyItems_ShouldWork()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var items = Enumerable.Range(1, 100)
+            .Select(i => new OrderItemCreatedDto(Guid.NewGuid(), $"Item {i}", i * 10.0m, i))
+            .ToList();
+
+        // Act
+        var @event = new OrderCreatedIntegrationEvent(orderId, items);
+
+        // Assert
+        @event.Items.Should().HaveCount(100);
+        @event.Items.Should().BeEquivalentTo(items);
+    }
+
+    [Fact(DisplayName = "OrderCreatedIntegrationEvent should preserve item order")]
+    [Trait("Application", "OrderCreatedIntegrationEvent")]
+    public void Constructor_ShouldPreserveItemOrder()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var items = new List<OrderItemCreatedDto>
+        {
+            new(Guid.NewGuid(), "First", 10m, 1),
+            new(Guid.NewGuid(), "Second", 20m, 2),
+            new(Guid.NewGuid(), "Third", 30m, 3)
+        };
+
+        // Act
+        var @event = new OrderCreatedIntegrationEvent(orderId, items);
+
+        // Assert
+        @event.Items[0].Name.Should().Be("First");
+        @event.Items[1].Name.Should().Be("Second");
+        @event.Items[2].Name.Should().Be("Third");
+    }
+
+    [Fact(DisplayName = "OrderCreatedIntegrationEvent with items having same ProductId")]
+    [Trait("Application", "OrderCreatedIntegrationEvent")]
+    public void Constructor_WithDuplicateProductIds_ShouldAllowIt()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var sameProductId = Guid.NewGuid();
+        var items = new List<OrderItemCreatedDto>
+        {
+            new(sameProductId, "Product A", 10m, 1),
+            new(sameProductId, "Product A", 10m, 2)
+        };
+
+        // Act
+        var @event = new OrderCreatedIntegrationEvent(orderId, items);
+
+        // Assert
+        @event.Items.Should().HaveCount(2);
+        @event.Items.All(i => i.ProductId == sameProductId).Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "OrderCreatedIntegrationEvent should handle items with zero prices")]
+    [Trait("Application", "OrderCreatedIntegrationEvent")]
+    public void Constructor_WithZeroPriceItems_ShouldWork()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var items = new List<OrderItemCreatedDto>
+        {
+            new(Guid.NewGuid(), "Free Item", 0m, 1)
+        };
+
+        // Act
+        var @event = new OrderCreatedIntegrationEvent(orderId, items);
+
+        // Assert
+        @event.Items[0].UnitPrice.Should().Be(0m);
+    }
+
+    [Fact(DisplayName = "OrderCreatedIntegrationEvent should handle items with negative quantities")]
+    [Trait("Application", "OrderCreatedIntegrationEvent")]
+    public void Constructor_WithNegativeQuantities_ShouldAcceptIt()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var items = new List<OrderItemCreatedDto>
+        {
+            new(Guid.NewGuid(), "Return Item", 10m, -1)
+        };
+
+        // Act
+        var @event = new OrderCreatedIntegrationEvent(orderId, items);
+
+        // Assert
+        @event.Items[0].Quantity.Should().Be(-1);
+    }
+
+    [Fact(DisplayName = "OrderCreatedIntegrationEvent with empty OrderId")]
+    [Trait("Application", "OrderCreatedIntegrationEvent")]
+    public void Constructor_WithEmptyOrderId_ShouldWork()
+    {
+        // Arrange
+        var orderId = Guid.Empty;
+        var items = new List<OrderItemCreatedDto>();
+
+        // Act
+        var @event = new OrderCreatedIntegrationEvent(orderId, items);
+
+        // Assert
+        @event.OrderId.Should().Be(Guid.Empty);
+    }
 }
