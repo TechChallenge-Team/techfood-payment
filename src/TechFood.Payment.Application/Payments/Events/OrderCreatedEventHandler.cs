@@ -22,7 +22,7 @@ public record OrderItemCreatedDto(
     int Quantity
 );
 
-internal class OrderCreatedEventHandler(
+public class OrderCreatedEventHandler(
     IMediator mediator,
     ILogger<OrderCreatedEventHandler> logger)
     : INotificationHandler<OrderCreatedIntegrationEvent>
