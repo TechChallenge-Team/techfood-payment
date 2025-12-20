@@ -82,4 +82,89 @@ public class ConfirmedPaymentEventTests
         // Assert
         @event.OrderId.Should().Be(Guid.Empty);
     }
+
+    [Fact(DisplayName = "ConfirmedPaymentEvent should be serializable for event publishing")]
+    [Trait("Application", "ConfirmedPaymentEvent")]
+    public void ConfirmedPaymentEvent_ShouldBeSerializable()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var @event = new ConfirmedPaymentEvent(orderId);
+
+        // Act
+        var json = System.Text.Json.JsonSerializer.Serialize(@event);
+        var deserializedEvent = System.Text.Json.JsonSerializer.Deserialize<ConfirmedPaymentEvent>(json);
+
+        // Assert
+        deserializedEvent.Should().NotBeNull();
+        deserializedEvent!.OrderId.Should().Be(orderId);
+    }
+
+    [Fact(DisplayName = "ConfirmedPaymentEvent with same OrderId should be equal")]
+    [Trait("Application", "ConfirmedPaymentEvent")]
+    public void TwoEvents_WithSameOrderId_ShouldHaveSameOrderId()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+
+        // Act
+        var event1 = new ConfirmedPaymentEvent(orderId);
+        var event2 = new ConfirmedPaymentEvent(orderId);
+
+        // Assert
+        event1.OrderId.Should().Be(event2.OrderId);
+    }
+
+    [Fact(DisplayName = "ConfirmedPaymentEvent should allow OrderId to be reset")]
+    [Trait("Application", "ConfirmedPaymentEvent")]
+    public void OrderId_CanBeResetToEmpty()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var @event = new ConfirmedPaymentEvent(orderId);
+
+        // Act
+        @event.OrderId = Guid.Empty;
+
+        // Assert
+        @event.OrderId.Should().Be(Guid.Empty);
+        @event.OrderId.Should().NotBe(orderId);
+    }
+
+    [Fact(DisplayName = "ConfirmedPaymentEvent should maintain state after multiple assignments")]
+    [Trait("Application", "ConfirmedPaymentEvent")]
+    public void OrderId_MultipleAssignments_ShouldMaintainLastValue()
+    {
+        // Arrange
+        var orderId1 = Guid.NewGuid();
+        var orderId2 = Guid.NewGuid();
+        var orderId3 = Guid.NewGuid();
+        var @event = new ConfirmedPaymentEvent(orderId1);
+
+        // Act
+        @event.OrderId = orderId2;
+        @event.OrderId = orderId3;
+
+        // Assert
+        @event.OrderId.Should().Be(orderId3);
+        @event.OrderId.Should().NotBe(orderId1);
+        @event.OrderId.Should().NotBe(orderId2);
+    }
+
+    [Theory(DisplayName = "ConfirmedPaymentEvent should work with different Guid formats")]
+    [Trait("Application", "ConfirmedPaymentEvent")]
+    [InlineData("00000000-0000-0000-0000-000000000000")]
+    [InlineData("11111111-1111-1111-1111-111111111111")]
+    [InlineData("ffffffff-ffff-ffff-ffff-ffffffffffff")]
+    public void Constructor_WithVariousGuidFormats_ShouldWork(string guidString)
+    {
+        // Arrange
+        var guid = Guid.Parse(guidString);
+
+        // Act
+        var @event = new ConfirmedPaymentEvent(guid);
+
+        // Assert
+        @event.OrderId.Should().Be(guid);
+    }
 }
