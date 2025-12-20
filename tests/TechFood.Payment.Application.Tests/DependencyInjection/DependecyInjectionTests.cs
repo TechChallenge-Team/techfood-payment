@@ -1,6 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using TechFood.Payment.Application;
-
 namespace TechFood.Payment.Application.Tests.DependencyInjection;
 
 public class DependecyInjectionTests
