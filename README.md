@@ -537,6 +537,14 @@ services:
       - rabbitmq
       - sqlserver
 ```
+## 🧪 Testes Sonar
+
+<img width="1559" height="745" alt="image" src="https://github.com/user-attachments/assets/89958c78-6a76-4dd3-b894-3ab741eb9648" />
+<img width="1764" height="954" alt="image" src="https://github.com/user-attachments/assets/1407ed85-caab-4cac-8b66-d0fa167de100" />
+
+
+
+```
 
 ### Health Checks
 

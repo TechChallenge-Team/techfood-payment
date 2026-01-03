@@ -136,19 +136,19 @@ jobs:
           docker push ${{ vars.DOCKERHUB_USERNAME }}/techfood-payment-api:latest
           docker push ${{ vars.DOCKERHUB_USERNAME }}/techfood-payment-api:${{ github.sha }}
 
-      # - name: Build Docker image (Worker)
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     docker build \
-      #       -t ${{ vars.DOCKERHUB_USERNAME }}/techfood-payment-worker:latest \
-      #       -t ${{ vars.DOCKERHUB_USERNAME }}/techfood-payment-worker:${{ github.sha }} \
-      #       -f src/TechFood.Payment.Worker/Dockerfile \
-      #       --build-arg GITHUB_TOKEN=${{ env.GITHUB_TOKEN }} \
-      #       --build-arg GITHUB_ACTOR=${{ github.actor }} \
-            # .
+      - name: Build Docker image (Worker)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker build \
+            -t ${{ vars.DOCKERHUB_USERNAME }}/techfood-payment-worker:latest \
+            -t ${{ vars.DOCKERHUB_USERNAME }}/techfood-payment-worker:${{ github.sha }} \
+            -f src/TechFood.Payment.Worker/Dockerfile \
+            --build-arg GITHUB_TOKEN=${{ env.GITHUB_TOKEN }} \
+            --build-arg GITHUB_ACTOR=${{ github.actor }} \
+            .
 
-      # - name: Push Docker image (Worker)
-      #   run: |
-      #     docker push ${{ vars.DOCKERHUB_USERNAME }}/techfood-payment-worker:latest
-      #     docker push ${{ vars.DOCKERHUB_USERNAME }}/techfood-payment-worker:${{ github.sha }}
+      - name: Push Docker image (Worker)
+        run: |
+          docker push ${{ vars.DOCKERHUB_USERNAME }}/techfood-payment-worker:latest
+          docker push ${{ vars.DOCKERHUB_USERNAME }}/techfood-payment-worker:${{ github.sha }}
