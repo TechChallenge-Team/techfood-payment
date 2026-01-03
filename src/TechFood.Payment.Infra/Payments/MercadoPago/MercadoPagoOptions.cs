@@ -4,9 +4,9 @@ namespace TechFood.Payment.Infra.Payments.MercadoPago
     {
         public const string SectionName = "Payments:MercadoPago";
 
-        public const string ClientName = "OrderClient";
+        public const string ClientName = "MercadoPagoClient";
 
-        public const string BaseAddress = "http://localhost:45001";
+        public const string BaseAddress = "https://api.mercadopago.com/";
 
         public string UserId { get; set; } = null!;
 
