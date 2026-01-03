@@ -26,7 +26,7 @@ var app = builder.Build();
 {
     app.RunMigration<PaymentContext>();
 
-    app.UsePathBase("/payment");
+    app.UsePathBase("/api/payment");
 
     app.UseForwardedHeaders();
 

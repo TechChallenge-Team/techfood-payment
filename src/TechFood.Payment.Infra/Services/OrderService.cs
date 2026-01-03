@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using TechFood.Payment.Application.Common.Dto.Order;
 using TechFood.Payment.Application.Common.Services.Interfaces;
 
-namespace TechFood.Payment.Infra.Order;
+namespace TechFood.Payment.Infra.Services;
 
 internal class OrderService : IOrderService
 {

@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Moq.Protected;
 using TechFood.Payment.Application.Common.Dto.Product;
-using TechFood.Payment.Infra.Backoffice;
+using TechFood.Payment.Infra.Services;
 
 namespace TechFood.Payment.Infra.Tests.Services;
 
