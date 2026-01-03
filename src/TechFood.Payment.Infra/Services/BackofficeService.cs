@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using TechFood.Payment.Application.Common.Dto.Product;
 using TechFood.Payment.Application.Common.Services.Interfaces;
 
-namespace TechFood.Payment.Infra.Backoffice
+namespace TechFood.Payment.Infra.Services
 {
     public class BackofficeService : IBackofficeService
     {

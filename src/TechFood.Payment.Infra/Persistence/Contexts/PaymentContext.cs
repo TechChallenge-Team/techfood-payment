@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TechFood.Shared.Domain.Entities;
-using TechFood.Shared.Domain.Events;
 using TechFood.Shared.Infra.Persistence.Contexts;
 
 namespace TechFood.Payment.Infra.Persistence.Contexts;
@@ -15,26 +13,6 @@ public class PaymentContext : TechFoodContext
     public DbSet<Domain.Entities.Payment> Payments { get; set; } = null!;
 
     public PaymentContext(DbContextOptions<PaymentContext> options) : base(options) { }
-
-    public Task<IEnumerable<IDomainEvent>> GetDomainEventsAsync()
-    {
-        var domainEvents = ChangeTracker.Entries<Entity>()
-            .Select(entry => entry.Entity.PopEvents())
-            .SelectMany(events => events);
-
-        return Task.FromResult(domainEvents);
-    }
-
-    public async Task<bool> CommitAsync()
-    {
-        var success = await SaveChangesAsync() > 0;
-        return success;
-    }
-
-    public Task RollbackAsync()
-    {
-        return Task.CompletedTask;
-    }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
