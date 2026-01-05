@@ -48,7 +48,7 @@ public class ConfirmPaymentCommandHandlerTests
         payment.PaidAt.Should().NotBeNull();
 
         _mediatorMock.Verify(
-            x => x.Publish(It.IsAny<ConfirmedPaymentEvent>(), It.IsAny<CancellationToken>()),
+            x => x.Publish(It.IsAny<PaymentConfirmedEvent>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -91,7 +91,7 @@ public class ConfirmPaymentCommandHandlerTests
         // Assert
         _mediatorMock.Verify(
             x => x.Publish(
-                It.IsAny<ConfirmedPaymentEvent>(),
+                It.IsAny<PaymentConfirmedEvent>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

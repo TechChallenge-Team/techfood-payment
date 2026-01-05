@@ -31,7 +31,7 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
 
         payment.Confirm();
 
-        await _mediator.Publish(new ConfirmedPaymentEvent());
+        await _mediator.Publish(new PaymentConfirmedEvent());
 
         return Unit.Value;
     }

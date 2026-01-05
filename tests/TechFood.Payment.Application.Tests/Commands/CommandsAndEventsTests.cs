@@ -42,7 +42,7 @@ public class CommandsAndEventsTests
     public void ConfirmedPaymentEvent_ShouldBeCreated()
     {
         // Act
-        var @event = new ConfirmedPaymentEvent();
+        var @event = new PaymentConfirmedEvent();
 
         // Assert
         @event.Should().NotBeNull();
