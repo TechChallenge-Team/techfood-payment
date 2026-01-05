@@ -41,8 +41,12 @@ public class CommandsAndEventsTests
     [Trait("Application", "Events")]
     public void ConfirmedPaymentEvent_ShouldBeCreated()
     {
+        // Arrange
+        var paymentId = Guid.NewGuid();
+        var orderId = Guid.NewGuid();
+
         // Act
-        var @event = new PaymentConfirmedEvent();
+        var @event = new PaymentConfirmedIntegrationEvent(paymentId, orderId);
 
         // Assert
         @event.Should().NotBeNull();

@@ -27,11 +27,13 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
         var payment = await _paymentRepository.GetByIdAsync(request.Id);
 
         if (payment == null)
+        {
             throw new ApplicationException(Exceptions.Payment_PaymentNotFound);
+        }
 
         payment.Confirm();
 
-        await _mediator.Publish(new PaymentConfirmedEvent());
+        await _mediator.Publish(new PaymentConfirmedIntegrationEvent(payment.Id, payment.OrderId), cancellationToken);
 
         return Unit.Value;
     }
