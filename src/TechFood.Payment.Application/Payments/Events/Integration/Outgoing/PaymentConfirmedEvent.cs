@@ -1,11 +1,11 @@
 using System;
 using TechFood.Shared.Application.Events;
 
-namespace TechFood.Payment.Application.Payments.Events
+namespace TechFood.Payment.Application.Payments.Events.Integration.Outgoing
 {
-    public class PaymentConfirmedIntegrationEvent : IIntegrationEvent
+    public class PaymentConfirmedEvent : IIntegrationEvent
     {
-        public PaymentConfirmedIntegrationEvent(
+        public PaymentConfirmedEvent(
             Guid paymentId,
             Guid orderId)
         {

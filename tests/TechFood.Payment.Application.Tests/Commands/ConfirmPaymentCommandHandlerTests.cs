@@ -1,6 +1,6 @@
 using MediatR;
 using TechFood.Payment.Application.Payments.Commands.ConfirmPayment;
-using TechFood.Payment.Application.Payments.Events;
+using TechFood.Payment.Application.Payments.Events.Integration.Outgoing;
 using TechFood.Payment.Domain.Repositories;
 using TechFood.Shared.Domain.Enums;
 
@@ -48,7 +48,7 @@ public class ConfirmPaymentCommandHandlerTests
         payment.PaidAt.Should().NotBeNull();
 
         _mediatorMock.Verify(
-            x => x.Publish(It.IsAny<PaymentConfirmedIntegrationEvent>(), It.IsAny<CancellationToken>()),
+            x => x.Publish(It.IsAny<PaymentConfirmedEvent>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -91,7 +91,7 @@ public class ConfirmPaymentCommandHandlerTests
         // Assert
         _mediatorMock.Verify(
             x => x.Publish(
-                It.IsAny<PaymentConfirmedIntegrationEvent>(),
+                It.IsAny<PaymentConfirmedEvent>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
