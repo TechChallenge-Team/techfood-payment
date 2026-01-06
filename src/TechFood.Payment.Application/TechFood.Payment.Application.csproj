@@ -54,4 +54,9 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Payments\Events\Domain\" />
+    <Folder Include="Payments\Events\Integration\Incoming\Handlers\" />
+  </ItemGroup>
+
 </Project>

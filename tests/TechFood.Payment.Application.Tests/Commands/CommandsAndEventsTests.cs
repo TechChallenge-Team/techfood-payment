@@ -1,6 +1,7 @@
 using TechFood.Payment.Application.Payments.Commands.ConfirmPayment;
 using TechFood.Payment.Application.Payments.Commands.CreatePayment;
 using TechFood.Payment.Application.Payments.Events;
+using TechFood.Payment.Application.Payments.Events.Integration.Outgoing;
 using TechFood.Shared.Domain.Enums;
 
 namespace TechFood.Payment.Application.Tests.Commands;
@@ -42,10 +43,11 @@ public class CommandsAndEventsTests
     public void ConfirmedPaymentEvent_ShouldBeCreated()
     {
         // Arrange
+        var paymentId = Guid.NewGuid();
         var orderId = Guid.NewGuid();
 
         // Act
-        var @event = new ConfirmedPaymentEvent(orderId);
+        var @event = new PaymentConfirmedEvent(paymentId, orderId);
 
         // Assert
         @event.Should().NotBeNull();
