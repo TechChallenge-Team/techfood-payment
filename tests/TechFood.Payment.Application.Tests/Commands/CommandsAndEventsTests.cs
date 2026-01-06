@@ -51,6 +51,7 @@ public class CommandsAndEventsTests
 
         // Assert
         @event.Should().NotBeNull();
+        @event.OrderId.Should().Be(orderId);
     }
 
     [Fact(DisplayName = "CreatePaymentCommand with different payment types")]
