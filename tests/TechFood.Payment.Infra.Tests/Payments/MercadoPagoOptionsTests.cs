@@ -17,7 +17,7 @@ public class MercadoPagoOptionsTests
     public void MercadoPagoOptions_ShouldHaveCorrectClientName()
     {
         // Assert
-        MercadoPagoOptions.ClientName.Should().Be("OrderClient");
+        MercadoPagoOptions.ClientName.Should().Be("MercadoPagoClient");
     }
 
     [Fact(DisplayName = "MercadoPagoOptions should have correct base address")]
@@ -25,7 +25,7 @@ public class MercadoPagoOptionsTests
     public void MercadoPagoOptions_ShouldHaveCorrectBaseAddress()
     {
         // Assert
-        MercadoPagoOptions.BaseAddress.Should().Be("http://localhost:45001");
+        MercadoPagoOptions.BaseAddress.Should().Be("https://api.mercadopago.com/");
     }
 
     [Fact(DisplayName = "MercadoPagoOptions should initialize with default values")]

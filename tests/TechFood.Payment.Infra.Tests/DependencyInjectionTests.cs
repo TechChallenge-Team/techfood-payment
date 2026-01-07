@@ -2,11 +2,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TechFood.Payment.Application.Common.Services.Interfaces;
 using TechFood.Payment.Domain.Repositories;
-using TechFood.Payment.Infra.Backoffice;
-using TechFood.Payment.Infra.Order;
 using TechFood.Payment.Infra.Payments.MercadoPago;
 using TechFood.Payment.Infra.Persistence.Contexts;
 using TechFood.Payment.Infra.Persistence.Repositories;
+using TechFood.Payment.Infra.Services;
 using TechFood.Shared.Domain.Enums;
 
 namespace TechFood.Payment.Infra.Tests;
