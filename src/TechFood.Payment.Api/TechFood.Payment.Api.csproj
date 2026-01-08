@@ -20,6 +20,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="TechFood.Shared.Application" Version="0.2.4-rc" />
     <PackageReference Include="TechFood.Shared.Infra" Version="0.2.4-rc" />
     <PackageReference Include="TechFood.Shared.Presentation" Version="0.2.4-rc" />

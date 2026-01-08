@@ -8,4 +8,6 @@ public interface IPaymentRepository
     Task<Guid> AddAsync(Entities.Payment payment);
 
     Task<Entities.Payment?> GetByIdAsync(Guid id);
+
+    Task<Entities.Payment?> GetByOrderIdAsync(Guid orderId);
 }

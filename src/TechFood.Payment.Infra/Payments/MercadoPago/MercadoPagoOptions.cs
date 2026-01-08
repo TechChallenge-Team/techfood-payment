@@ -11,5 +11,7 @@ namespace TechFood.Payment.Infra.Payments.MercadoPago
         public string UserId { get; set; } = null!;
 
         public string AccessToken { get; set; } = null!;
+
+        public string? WebhookSecret { get; set; }
     }
 }

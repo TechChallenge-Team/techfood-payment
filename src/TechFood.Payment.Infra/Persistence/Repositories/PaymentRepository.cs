@@ -21,4 +21,9 @@ public class PaymentRepository(PaymentContext dbContext) : IPaymentRepository
     {
         return _payments.FirstOrDefaultAsync(x => x.Id == id);
     }
+
+    public Task<Domain.Entities.Payment?> GetByOrderIdAsync(Guid orderId)
+    {
+        return _payments.FirstOrDefaultAsync(x => x.OrderId == orderId);
+    }
 }
