@@ -14,7 +14,7 @@ namespace TechFood.Payment.Application.Payments.Commands.CreatePayment;
 
 public class CreatePaymentCommandHandler(
     IOrderService orderService,
-    IBackofficeService productService,
+    IBackofficeService backOfficeService,
     IPaymentRepository paymentRepository,
     IServiceProvider serviceProvider)
         : IRequestHandler<CreatePaymentCommand, PaymentDto>
@@ -29,7 +29,7 @@ public class CreatePaymentCommandHandler(
         }
 
         var payment = new Domain.Entities.Payment(request.OrderId, request.Type, order.Amount);
-        var products = await productService.GetAllAsync();
+        var products = await backOfficeService.GetAllAsync();
 
         var qrCodeData = string.Empty;
         var paymentService = serviceProvider.GetRequiredKeyedService<IPaymentService>(request.Type);
@@ -43,7 +43,7 @@ public class CreatePaymentCommandHandler(
                     "TechFood - Order #" + order.Number,
                     order.Amount,
                     order.Items.ToList().ConvertAll(i => new Common.Dto.PaymentItem(
-                        products.FirstOrDefault(p => p.Id == i.Id)?.Name ?? "",
+                        products.FirstOrDefault(p => p.Id == i.ProductId)?.Name ?? "",
                         i.Quantity,
                         "unit",
                         i.Price,
