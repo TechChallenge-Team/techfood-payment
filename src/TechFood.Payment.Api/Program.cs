@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HostFiltering;
 using TechFood.Payment.Application;
 using TechFood.Payment.Infra;
 using TechFood.Payment.Infra.Persistence.Contexts;
@@ -5,6 +6,12 @@ using TechFood.Shared.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 {
+    // Desabilitar validação de host
+    builder.Services.Configure<HostFilteringOptions>(options =>
+    {
+        options.AllowedHosts.Clear();
+    });
+
     builder.Services.AddPresentation(builder.Configuration, new PresentationOptions
     {
         AddSwagger = true,

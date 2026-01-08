@@ -42,6 +42,8 @@ public class Payment : Entity, IAggregateRoot
 
     public decimal Amount { get; private set; }
 
+    public bool IsConfirmed => PaidAt.HasValue;
+
     public void Confirm()
     {
         if (PaidAt.HasValue)

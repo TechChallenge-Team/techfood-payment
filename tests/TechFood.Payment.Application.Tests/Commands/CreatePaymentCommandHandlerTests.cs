@@ -544,8 +544,8 @@ public class CreatePaymentCommandHandlerTests
             Amount = 150m,
             Items = new List<OrderItemResult>
             {
-                new() { Id = product1Id, Quantity = 2, Price = 50m },
-                new() { Id = product2Id, Quantity = 1, Price = 50m }
+                new() { ProductId = product1Id, Quantity = 2, Price = 50m },
+                new() { ProductId = product2Id, Quantity = 1, Price = 50m }
             }
         };
 
