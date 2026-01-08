@@ -66,7 +66,8 @@ public class CreatePaymentCommandHandler(
             payment.PaidAt,
             payment.Type,
             payment.Status,
-            payment.Amount
+            payment.Amount,
+            qrCodeData
         );
     }
 }
